@@ -1,6 +1,6 @@
 name: esewa-mcp-server
 runtime: nodejs
-entrypoint: server.js
+entrypoint: server.mjs
 port: 3000
 env:
   ESEWA_MERCHANT_CODE: "EPAYTEST"
