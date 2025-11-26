@@ -1,0 +1,99 @@
+{
+  "version": "1.0.0",
+  "name": "esewa-mcp-server",
+  "description": "MCP wrapper for eSewa payment: create payment sessions, verify transactions, refund, and fetch status.",
+  "server": {
+    "transport": "https",
+    "url": "https://YOUR-SERVER-URL.com" 
+  },
+  "auth": {
+    "type": "none"
+  },
+  "tools": [
+    {
+      "name": "createPaymentSession",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "amount": { "type": "number" },
+          "transactionId": { "type": "string" },
+          "productName": { "type": "string" },
+          "merchantCode": { "type": "string" },
+          "returnUrl": { "type": "string" },
+          "cancelUrl": { "type": "string" }
+        },
+        "required": [
+          "amount",
+          "transactionId",
+          "productName",
+          "merchantCode",
+          "returnUrl"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "paymentUrl": { "type": "string" },
+          "message": { "type": "string" }
+        },
+        "required": ["paymentUrl"]
+      }
+    },
+    {
+      "name": "verifyTransaction",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "transactionId": { "type": "string" },
+          "amount": { "type": "number" }
+        },
+        "required": ["transactionId", "amount"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "response": { "type": "object" }
+        },
+        "required": ["status"]
+      }
+    },
+    {
+      "name": "refundPayment",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "transactionId": { "type": "string" },
+          "amount": { "type": "number" }
+        },
+        "required": ["transactionId", "amount"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "message": { "type": "string" }
+        },
+        "required": ["status"]
+      }
+    },
+    {
+      "name": "getPaymentStatus",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "transactionId": { "type": "string" }
+        },
+        "required": ["transactionId"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "details": { "type": "object" }
+        },
+        "required": ["status"]
+      }
+    }
+  ]
+}
