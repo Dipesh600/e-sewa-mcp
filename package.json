@@ -1,0 +1,20 @@
+{
+  "name": "esewa-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP wrapper for eSewa payments (session creation, verification, refunds, status).",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "latest",
+    "axios": "^1.6.7",
+    "express": "^4.19.2",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}
