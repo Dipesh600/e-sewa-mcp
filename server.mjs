@@ -23,17 +23,27 @@ mcpServer.registerTool("initiate_payment", {
   description: "Initiate a new eSewa payment",
   inputSchema: { amount: Number, productId: String, successUrl: String, failureUrl: String },
 }, async ({ amount, productId, successUrl, failureUrl }) => {
-  const result = await createPaymentSessionService({
-    amount,
-    transactionId: productId,
-    productName: productId,
-    returnUrl: successUrl,
-    cancelUrl: failureUrl
-  });
-  return {
-    content: [{ type: 'text', text: JSON.stringify(result) }],
-    structuredContent: result
-  };
+  try {
+    const result = await createPaymentSessionService({
+      amount,
+      transactionId: productId,
+      productName: productId,
+      returnUrl: successUrl,
+      cancelUrl: failureUrl
+    });
+    const responseText = JSON.stringify(result);
+    return {
+      content: [{ type: 'text', text: responseText }],
+      structuredContent: result
+    };
+  } catch (err) {
+    const errorObj = { error: err.message || String(err) };
+    return {
+      content: [{ type: 'text', text: JSON.stringify(errorObj) }],
+      structuredContent: errorObj,
+      isError: true
+    };
+  }
 });
 
 mcpServer.registerTool("verify_payment", {
@@ -41,11 +51,21 @@ mcpServer.registerTool("verify_payment", {
   description: "Verify an eSewa payment transaction",
   inputSchema: { transactionId: String, refId: String, amount: Number }
 }, async ({ transactionId, refId, amount }) => {
-  const result = await verifyTransactionService({ transactionId, amount });
-  return {
-    content: [{ type: 'text', text: JSON.stringify(result) }],
-    structuredContent: result
-  };
+  try {
+    const result = await verifyTransactionService({ transactionId, amount });
+    const responseText = JSON.stringify(result);
+    return {
+      content: [{ type: 'text', text: responseText }],
+      structuredContent: result
+    };
+  } catch (err) {
+    const errorObj = { error: err.message || String(err) };
+    return {
+      content: [{ type: 'text', text: JSON.stringify(errorObj) }],
+      structuredContent: errorObj,
+      isError: true
+    };
+  }
 });
 
 mcpServer.registerTool("get_test_credentials", {
@@ -53,27 +73,27 @@ mcpServer.registerTool("get_test_credentials", {
   description: "Get eSewa test credentials and merchant info",
   inputSchema: {},
 }, async () => {
-  return {
-    content: [{
-      type: 'text',
-      text: JSON.stringify({
-        users: ["9800000000", "9800000001"],
-        password: "asdf@123",
-        mpin: "1234",
-        merchantId: process.env.ESEWA_MERCHANT_CODE || "EPAYTEST",
-        token: process.env.ESEWA_TOKEN || "123456",
-        secretKey: process.env.ESEWA_SECRET_KEY || "8gBm/:&EnhH.1/q"
-      })
-    }],
-    structuredContent: {
+  try {
+    const creds = {
       users: ["9800000000", "9800000001"],
       password: "asdf@123",
       mpin: "1234",
       merchantId: process.env.ESEWA_MERCHANT_CODE || "EPAYTEST",
       token: process.env.ESEWA_TOKEN || "123456",
       secretKey: process.env.ESEWA_SECRET_KEY || "8gBm/:&EnhH.1/q"
-    }
-  };
+    };
+    return {
+      content: [{ type: 'text', text: JSON.stringify(creds) }],
+      structuredContent: creds
+    };
+  } catch (err) {
+    const errorObj = { error: err.message || String(err) };
+    return {
+      content: [{ type: 'text', text: JSON.stringify(errorObj) }],
+      structuredContent: errorObj,
+      isError: true
+    };
+  }
 });
 
 mcpServer.registerTool("health_check", {
@@ -81,11 +101,21 @@ mcpServer.registerTool("health_check", {
   description: "Check server health and uptime",
   inputSchema: {},
 }, async () => {
-  const uptime = process.uptime();
-  return {
-    content: [{ type: 'text', text: JSON.stringify({ status: "healthy", uptime }) }],
-    structuredContent: { status: "healthy", uptime }
-  };
+  try {
+    const uptime = process.uptime();
+    const health = { status: "healthy", uptime };
+    return {
+      content: [{ type: 'text', text: JSON.stringify(health) }],
+      structuredContent: health
+    };
+  } catch (err) {
+    const errorObj = { error: err.message || String(err) };
+    return {
+      content: [{ type: 'text', text: JSON.stringify(errorObj) }],
+      structuredContent: errorObj,
+      isError: true
+    };
+  }
 });
 
 // HTTP server required by MCP
