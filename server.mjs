@@ -18,36 +18,74 @@ const mcpServer = new McpServer({
 });
 
 // Register tools
-mcpServer.registerTool("createPaymentSession", {
-  title: "Create Payment Session",
-  description: "Create a new eSewa payment session",
-  inputSchema: { amount: Number, transactionId: String },
-}, async ({ amount, transactionId }, extra) => {
-  return await createPaymentSessionService({ amount, transactionId });
+mcpServer.registerTool("initiate_payment", {
+  title: "Initiate Payment",
+  description: "Initiate a new eSewa payment",
+  inputSchema: { amount: Number, productId: String, successUrl: String, failureUrl: String },
+}, async ({ amount, productId, successUrl, failureUrl }) => {
+  const result = await createPaymentSessionService({
+    amount,
+    transactionId: productId,
+    productName: productId,
+    returnUrl: successUrl,
+    cancelUrl: failureUrl
+  });
+  return {
+    content: [{ type: 'text', text: JSON.stringify(result) }],
+    structuredContent: result
+  };
 });
 
-mcpServer.registerTool("verifyTransaction", {
-  title: "Verify Transaction",
-  description: "Verify a transaction",
-  inputSchema: { transactionId: String, amount: Number }
-}, async ({ transactionId, amount }) => {
-  return await verifyTransactionService({ transactionId, amount });
+mcpServer.registerTool("verify_payment", {
+  title: "Verify Payment",
+  description: "Verify an eSewa payment transaction",
+  inputSchema: { transactionId: String, refId: String, amount: Number }
+}, async ({ transactionId, refId, amount }) => {
+  const result = await verifyTransactionService({ transactionId, amount });
+  return {
+    content: [{ type: 'text', text: JSON.stringify(result) }],
+    structuredContent: result
+  };
 });
 
-mcpServer.registerTool("refundPayment", {
-  title: "Refund Payment",
-  description: "Refund a payment",
-  inputSchema: { transactionId: String, amount: Number }
-}, async ({ transactionId, amount }) => {
-  return await refundPaymentService({ transactionId, amount });
+mcpServer.registerTool("get_test_credentials", {
+  title: "Get Test Credentials",
+  description: "Get eSewa test credentials and merchant info",
+  inputSchema: {},
+}, async () => {
+  return {
+    content: [{
+      type: 'text',
+      text: JSON.stringify({
+        users: ["9800000000", "9800000001"],
+        password: "asdf@123",
+        mpin: "1234",
+        merchantId: process.env.ESEWA_MERCHANT_CODE || "EPAYTEST",
+        token: process.env.ESEWA_TOKEN || "123456",
+        secretKey: process.env.ESEWA_SECRET_KEY || "8gBm/:&EnhH.1/q"
+      })
+    }],
+    structuredContent: {
+      users: ["9800000000", "9800000001"],
+      password: "asdf@123",
+      mpin: "1234",
+      merchantId: process.env.ESEWA_MERCHANT_CODE || "EPAYTEST",
+      token: process.env.ESEWA_TOKEN || "123456",
+      secretKey: process.env.ESEWA_SECRET_KEY || "8gBm/:&EnhH.1/q"
+    }
+  };
 });
 
-mcpServer.registerTool("getPaymentStatus", {
-  title: "Get Payment Status",
-  description: "Get payment status",
-  inputSchema: { transactionId: String }
-}, async ({ transactionId }) => {
-  return await getPaymentStatusService({ transactionId });
+mcpServer.registerTool("health_check", {
+  title: "Health Check",
+  description: "Check server health and uptime",
+  inputSchema: {},
+}, async () => {
+  const uptime = process.uptime();
+  return {
+    content: [{ type: 'text', text: JSON.stringify({ status: "healthy", uptime }) }],
+    structuredContent: { status: "healthy", uptime }
+  };
 });
 
 // HTTP server required by MCP
