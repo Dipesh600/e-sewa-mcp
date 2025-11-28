@@ -1,0 +1,102 @@
+{
+  "server_url": "https://e-sewa-mcp-production.up.railway.app/mcp",
+  "sse_endpoint": "https://e-sewa-mcp-production.up.railway.app/sse",
+  "health_check": "https://e-sewa-mcp-production.up.railway.app/",
+  
+  "tools": {
+    "configure_credentials": {
+      "description": "Configure eSewa merchant credentials",
+      "required_params": ["merchantCode", "secretKey"],
+      "optional_params": ["environment", "sessionId"]
+    },
+    
+    "initiate_payment": {
+      "description": "Create a new payment session",
+      "required_params": ["amount", "transactionId", "successUrl", "failureUrl"],
+      "optional_params": ["merchantCode", "secretKey", "environment", "sessionId"]
+    },
+    
+    "verify_payment": {
+      "description": "Verify a completed payment transaction",
+      "required_params": ["transactionId", "amount"],
+      "optional_params": ["merchantCode", "secretKey", "environment", "sessionId"]
+    },
+    
+    "get_current_config": {
+      "description": "Get current configuration status",
+      "required_params": [],
+      "optional_params": ["sessionId"]
+    },
+    
+    "get_test_credentials": {
+      "description": "Get sandbox test credentials",
+      "required_params": [],
+      "optional_params": []
+    },
+    
+    "get_setup_instructions": {
+      "description": "Get setup instructions for eSewa merchant account",
+      "required_params": [],
+      "optional_params": []
+    }
+  },
+  
+  "sandbox_test_users": [
+    {
+      "id": "9806800001",
+      "password": "Nepal@123",
+      "mpin": "1122",
+      "token": "123456"
+    },
+    {
+      "id": "9806800002", 
+      "password": "Nepal@123",
+      "mpin": "1122",
+      "token": "123456"
+    }
+  ],
+  
+  "default_sandbox_credentials": {
+    "merchantCode": "EPAYTEST",
+    "secretKey": "8gBm/:&EnhH.1/q"
+  },
+  
+  "environments": {
+    "sandbox": {
+      "payment_url": "https://rc-epay.esewa.com.np/api/epay/main/v2/form",
+      "verify_url": "https://rc-epay.esewa.com.np/api/epay/transaction/status/"
+    },
+    "production": {
+      "payment_url": "https://epay.esewa.com.np/api/epay/main/v2/form", 
+      "verify_url": "https://epay.esewa.com.np/api/epay/transaction/status/"
+    }
+  },
+  
+  "example_usage": {
+    "basic_payment_flow": [
+      {
+        "step": 1,
+        "tool": "get_test_credentials",
+        "params": {}
+      },
+      {
+        "step": 2,
+        "tool": "initiate_payment",
+        "params": {
+          "amount": 500,
+          "transactionId": "TEST_ORDER_123",
+          "successUrl": "https://yourapp.com/success",
+          "failureUrl": "https://yourapp.com/failure"
+        }
+      },
+      {
+        "step": 3,
+        "tool": "verify_payment",
+        "params": {
+          "transactionId": "TEST_ORDER_123",
+          "amount": 500
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,442 @@
+{
+  "mcp": {
+    "name": "eSewa Payment Gateway MCP Server",
+    "version": "1.0.0",
+    "description": "MCP server for eSewa payment gateway integration with sandbox and production support",
+    "transport": {
+      "type": "http",
+      "url": "https://e-sewa-mcp-production.up.railway.app/mcp",
+      "sse_endpoint": "https://e-sewa-mcp-production.up.railway.app/sse"
+    },
+    "capabilities": {
+      "tools": {
+        "list_changed": false,
+        "tools": [
+          {
+            "name": "configure_credentials",
+            "description": "Configure eSewa merchant credentials. If not called, sandbox credentials will be used by default.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "merchantCode": {
+                  "type": "string",
+                  "description": "Your eSewa merchant code (e.g., 'EPAYTEST' for sandbox or your actual merchant code)",
+                  "examples": ["EPAYTEST", "YOUR_MERCHANT_CODE"]
+                },
+                "secretKey": {
+                  "type": "string",
+                  "description": "Your eSewa secret key",
+                  "examples": ["8gBm/:&EnhH.1/q", "YOUR_SECRET_KEY"]
+                },
+                "environment": {
+                  "type": "string",
+                  "enum": ["sandbox", "production"],
+                  "description": "Environment to use: 'sandbox' for testing or 'production' for live payments",
+                  "default": "sandbox"
+                },
+                "sessionId": {
+                  "type": "string",
+                  "description": "Optional session ID to store credentials for multiple users"
+                }
+              },
+              "required": ["merchantCode", "secretKey"]
+            },
+            "output_schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "description": "Whether credentials were configured successfully"
+                },
+                "environment": {
+                  "type": "string",
+                  "enum": ["sandbox", "production"],
+                  "description": "The environment that was configured"
+                },
+                "merchantCode": {
+                  "type": "string",
+                  "description": "The merchant code that was configured"
+                }
+              }
+            }
+          },
+          {
+            "name": "initiate_payment",
+            "description": "Initiate a new eSewa payment session. Uses configured credentials or sandbox if not set.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "amount": {
+                  "type": "number",
+                  "description": "Payment amount in NPR",
+                  "minimum": 1,
+                  "examples": [100, 500, 1000]
+                },
+                "transactionId": {
+                  "type": "string",
+                  "description": "Unique transaction ID",
+                  "examples": ["TXN123456", "ORDER_789"]
+                },
+                "successUrl": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "URL to redirect after successful payment",
+                  "examples": ["https://yourapp.com/payment/success", "https://yourapp.com/success"]
+                },
+                "failureUrl": {
+                  "type": "string",
+                  "format": "uri",
+                  "description": "URL to redirect after failed payment",
+                  "examples": ["https://yourapp.com/payment/failure", "https://yourapp.com/failure"]
+                },
+                "merchantCode": {
+                  "type": "string",
+                  "description": "Optional: Merchant code for this transaction (overrides configured credentials)"
+                },
+                "secretKey": {
+                  "type": "string",
+                  "description": "Optional: Secret key for this transaction (overrides configured credentials)"
+                },
+                "environment": {
+                  "type": "string",
+                  "enum": ["sandbox", "production"],
+                  "description": "Optional: Environment for this transaction"
+                },
+                "sessionId": {
+                  "type": "string",
+                  "description": "Optional: Session ID to use stored credentials"
+                }
+              },
+              "required": ["amount", "transactionId", "successUrl", "failureUrl"]
+            },
+            "output_schema": {
+              "type": "object",
+              "properties": {
+                "paymentUrl": {
+                  "type": "string",
+                  "description": "The URL to redirect the user to for payment"
+                },
+                "paymentData": {
+                  "type": "object",
+                  "description": "The payment data that was submitted"
+                },
+                "signature": {
+                  "type": "string",
+                  "description": "The generated signature for verification"
+                }
+              }
+            }
+          },
+          {
+            "name": "verify_payment",
+            "description": "Verify an eSewa payment transaction. Uses configured credentials or sandbox if not set.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "transactionId": {
+                  "type": "string",
+                  "description": "Transaction UUID to verify",
+                  "examples": ["TXN123456", "ORDER_789"]
+                },
+                "amount": {
+                  "type": "number",
+                  "description": "Transaction amount",
+                  "minimum": 1,
+                  "examples": [100, 500, 1000]
+                },
+                "merchantCode": {
+                  "type": "string",
+                  "description": "Optional: Merchant code (overrides configured credentials)"
+                },
+                "secretKey": {
+                  "type": "string",
+                  "description": "Optional: Secret key (overrides configured credentials)"
+                },
+                "environment": {
+                  "type": "string",
+                  "enum": ["sandbox", "production"],
+                  "description": "Optional: Environment"
+                },
+                "sessionId": {
+                  "type": "string",
+                  "description": "Optional: Session ID to use stored credentials"
+                }
+              },
+              "required": ["transactionId", "amount"]
+            },
+            "output_schema": {
+              "type": "object",
+              "properties": {
+                "verified": {
+                  "type": "boolean",
+                  "description": "Whether the payment was successfully verified"
+                },
+                "transactionId": {
+                  "type": "string",
+                  "description": "The transaction ID that was verified"
+                },
+                "amount": {
+                  "type": "number",
+                  "description": "The amount that was verified"
+                },
+                "status": {
+                  "type": "string",
+                  "description": "The status of the verification"
+                },
+                "response": {
+                  "type": "object",
+                  "description": "The full response from eSewa"
+                }
+              }
+            }
+          },
+          {
+            "name": "get_current_config",
+            "description": "Get the currently configured credentials or confirm using sandbox mode",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "sessionId": {
+                  "type": "string",
+                  "description": "Optional: Session ID to check stored credentials"
+                }
+              }
+            },
+            "output_schema": {
+              "type": "object",
+              "properties": {
+                "environment": {
+                  "type": "string",
+                  "enum": ["sandbox", "production"],
+                  "description": "Current environment"
+                },
+                "merchantCode": {
+                  "type": "string",
+                  "description": "Current merchant code"
+                },
+                "usingStoredCredentials": {
+                  "type": "boolean",
+                  "description": "Whether stored credentials are being used"
+                },
+                "message": {
+                  "type": "string",
+                  "description": "Informational message about current configuration"
+                }
+              }
+            }
+          },
+          {
+            "name": "get_test_credentials",
+            "description": "Get eSewa sandbox test credentials for testing",
+            "input_schema": {
+              "type": "object",
+              "properties": {}
+            },
+            "output_schema": {
+              "type": "object",
+              "properties": {
+                "testUsers": {
+                  "type": "array",
+                  "description": "Array of test user credentials",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "description": "Test user ID"
+                      },
+                      "password": {
+                        "type": "string",
+                        "description": "Test user password"
+                      },
+                      "mpin": {
+                        "type": "string",
+                        "description": "Test user MPIN"
+                      },
+                      "token": {
+                        "type": "string",
+                        "description": "Test user token"
+                      },
+                      "note": {
+                        "type": "string",
+                        "description": "Usage notes for this test user"
+                      }
+                    }
+                  }
+                },
+                "instructions": {
+                  "type": "array",
+                  "description": "Instructions for using test credentials"
+                },
+                "importantNote": {
+                  "type": "string",
+                  "description": "Important note about sandbox vs production"
+                }
+              }
+            }
+          },
+          {
+            "name": "get_setup_instructions",
+            "description": "Get instructions on how to obtain eSewa merchant credentials",
+            "input_schema": {
+              "type": "object",
+              "properties": {}
+            },
+            "output_schema": {
+              "type": "object",
+              "properties": {
+                "instructions": {
+                  "type": "array",
+                  "description": "Step-by-step instructions"
+                },
+                "sandbox": {
+                  "type": "object",
+                  "description": "Sandbox-specific information"
+                },
+                "production": {
+                  "type": "object",
+                  "description": "Production-specific information"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "environments": {
+      "sandbox": {
+        "description": "Test environment with predefined credentials",
+        "default_credentials": {
+          "merchantCode": "EPAYTEST",
+          "secretKey": "8gBm/:&EnhH.1/q",
+          "payment_url": "https://rc-epay.esewa.com.np/api/epay/main/v2/form",
+          "verify_url": "https://rc-epay.esewa.com.np/api/epay/transaction/status/"
+        },
+        "test_users": [
+          {
+            "id": "9806800001",
+            "password": "Nepal@123",
+            "mpin": "1122",
+            "token": "123456"
+          },
+          {
+            "id": "9806800002",
+            "password": "Nepal@123",
+            "mpin": "1122",
+            "token": "123456"
+          }
+        ]
+      },
+      "production": {
+        "description": "Live environment for real transactions",
+        "payment_url": "https://epay.esewa.com.np/api/epay/main/v2/form",
+        "verify_url": "https://epay.esewa.com.np/api/epay/transaction/status/",
+        "requirements": [
+          "Valid eSewa merchant account",
+          "Approved merchant code",
+          "Secret key from eSewa",
+          "SSL certificate for your website"
+        ]
+      }
+    },
+    "authentication": {
+      "type": "none",
+      "description": "No authentication required for basic usage. Sandbox credentials are used by default."
+    },
+    "session_management": {
+      "description": "Optional session-based credential storage for multi-user scenarios",
+      "session_id": {
+        "description": "Optional session identifier to isolate credentials per user/session",
+        "usage": "Pass sessionId parameter in any tool call to use stored credentials for that session"
+      }
+    },
+    "error_handling": {
+      "error_codes": {
+        "-32601": "Method not found",
+        "-32602": "Invalid params",
+        "-32603": "Internal error",
+        "-32000": "Server error"
+      },
+      "common_errors": [
+        {
+          "error": "Invalid merchant credentials",
+          "solution": "Use get_test_credentials for sandbox or configure_credentials with valid credentials"
+        },
+        {
+          "error": "Transaction verification failed",
+          "solution": "Check transactionId and amount parameters, ensure transaction exists"
+        },
+        {
+          "error": "Payment initiation failed",
+          "solution": "Verify all required parameters and URLs are valid"
+        }
+      ]
+    },
+    "examples": {
+      "basic_usage": {
+        "description": "Basic payment flow using sandbox mode",
+        "steps": [
+          {
+            "step": 1,
+            "tool": "get_test_credentials",
+            "description": "Get sandbox test credentials"
+          },
+          {
+            "step": 2,
+            "tool": "initiate_payment",
+            "description": "Create a payment session",
+            "parameters": {
+              "amount": 100,
+              "transactionId": "TEST123",
+              "successUrl": "https://yourapp.com/success",
+              "failureUrl": "https://yourapp.com/failure"
+            }
+          },
+          {
+            "step": 3,
+            "tool": "verify_payment",
+            "description": "Verify the payment after completion",
+            "parameters": {
+              "transactionId": "TEST123",
+              "amount": 100
+            }
+          }
+        ]
+      },
+      "production_usage": {
+        "description": "Production payment flow with custom credentials",
+        "steps": [
+          {
+            "step": 1,
+            "tool": "configure_credentials",
+            "description": "Configure production credentials",
+            "parameters": {
+              "merchantCode": "YOUR_MERCHANT_CODE",
+              "secretKey": "YOUR_SECRET_KEY",
+              "environment": "production"
+            }
+          },
+          {
+            "step": 2,
+            "tool": "initiate_payment",
+            "description": "Create a production payment session"
+          },
+          {
+            "step": 3,
+            "tool": "verify_payment",
+            "description": "Verify the production payment"
+          }
+        ]
+      }
+    },
+    "rate_limits": {
+      "description": "No specific rate limits enforced by this MCP server",
+      "note": "Respect eSewa's rate limits when using production credentials"
+    },
+    "support": {
+      "documentation": "https://github.com/Dipesh600/e-sewa-mcp",
+      "issues": "https://github.com/Dipesh600/e-sewa-mcp/issues",
+      "deployment": "https://e-sewa-mcp-production.up.railway.app/"
+    }
+  }
+}
