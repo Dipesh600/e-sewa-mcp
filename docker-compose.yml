@@ -8,6 +8,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+      - HOST=0.0.0.0
       - ESEWA_ENVIRONMENT=${ESEWA_ENVIRONMENT:-sandbox}
       - ESEWA_MERCHANT_CODE=${ESEWA_MERCHANT_CODE:-}
       - ESEWA_SECRET_KEY=${ESEWA_SECRET_KEY:-}

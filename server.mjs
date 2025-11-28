@@ -943,11 +943,12 @@ app.post("/mcp", async (req, res) => {
 
 // Start server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 eSewa MCP Server running on port ${PORT}`);
-  console.log(`📍 Health check: http://localhost:${PORT}/`);
-  console.log(`📍 MCP endpoint: http://localhost:${PORT}/mcp`);
-  console.log(`📍 SSE endpoint: http://localhost:${PORT}/sse`);
+const HOST = process.env.HOST || '0.0.0.0';
+app.listen(PORT, HOST, () => {
+  console.log(`🚀 eSewa MCP Server running on ${HOST}:${PORT}`);
+  console.log(`📍 Health check: http://${HOST}:${PORT}/`);
+  console.log(`📍 MCP endpoint: http://${HOST}:${PORT}/mcp`);
+  console.log(`📍 SSE endpoint: http://${HOST}:${PORT}/sse`);
   console.log(`\n💡 Features:`);
   console.log(`   - Automatic sandbox mode if no credentials configured`);
   console.log(`   - Dynamic credential configuration per session`);
