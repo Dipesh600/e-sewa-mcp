@@ -6,7 +6,10 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "dev": "nodemon --exec node server.mjs"
+    "dev": "nodemon --exec node server.mjs",
+    "start:safe": "node start-server.js",
+    "test:connection": "node test-connection.js",
+    "test:all": "./test-mcp.sh"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.23.0",

@@ -1,8 +1,0 @@
-name: esewa-mcp-server
-runtime: nodejs
-entrypoint: server.mjs
-port: 3000
-env:
-  ESEWA_MERCHANT_CODE: "EPAYTEST"
-  ESEWA_SECRET_KEY: "8gBm/:&EnhH.1/q"
-  ESEWA_TOKEN: "123456"
